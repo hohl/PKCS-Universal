@@ -1,7 +1,7 @@
 PKCS-Universal
 ==============
 
-Obj-C helper for working with [PKCS/RSA][pkcsWiki], Keychain and CommonCrypto for iOS and OS X.
+Obj-C helper for working with [PKCS/RSA][pkcsWiki], Keychain and CommonCrypto for iOS.
 
 ## Installation
 
@@ -28,6 +28,10 @@ Obj-C helper for working with [PKCS/RSA][pkcsWiki], Keychain and CommonCrypto fo
 That's it. The helper also provides functions for storing and deleting keys in the keychain if you want to import a key from somewhere else.
 
 Working with PKCS/RSA can't be easier!
+
+## ToDo
+
+- OS X support (Common Crypto has almost same API on OS X, but since I don't need it myself it has not been ported yet.)
 
 ## [MIT License][mitLink]
 
