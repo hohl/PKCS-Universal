@@ -12,7 +12,7 @@ Obj-C helper for working with [PKCS/RSA][pkcsWiki], Keychain and CommonCrypto fo
 #### From source
 
 * Drag the `PKCS.h` and `PKCS.m` files to your project
-* Link the `libcommomCrypto.dylib` to your project
+* Link the `libcommonCrypto.dylib` to your project
 
 #### Too cool for [ARC](https://developer.apple.com/library/mac/releasenotes/ObjectiveC/RN-TransitioningToARC/Introduction/Introduction.html)?
 
