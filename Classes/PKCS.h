@@ -69,10 +69,19 @@ BOOL PKCSUpdateRSAKey(CFTypeRef keyClass, NSData* keyData, NSString* keyTagStrin
  *
  * @param keyClass May either be kSecAttrKeyClassPublic or kSecAttrKeyClassPrivate and defines if the private or public key should get loaded.
  * @param keyTagString tag used to store and retrive keys.
- * @return NULL or the loaded key.
+ * @return NULL or the loaded SecKeyRef.
  * @discussion Attention! The returned key must be manually released with CFRelease.
  */
 SecKeyRef PKCSLoadRSAKey(CFTypeRef keyClass, NSString* keyTagString);
+
+/**
+ * Loads the bytes of the key instead of a SecKeyRef.
+ *
+ * @param keyClass May either be kSecAttrKeyClassPublic or kSecAttrKeyClassPrivate and defines if the private or public key should get loaded.
+ * @param keyTagString tag used to store and retrive keys.
+ * @return NULL or the loaded key as NSData represation.
+ */
+NSData* PKCSLoadRSAKeyData(CFTypeRef keyClass, NSString* keyTagString);
 
 /**
  * Deletes the RSA key with the passed tag.

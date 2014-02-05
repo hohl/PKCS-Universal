@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'PKCS-Universal'
-  s.version      = '1.0.2'
+  s.version      = '1.1.0'
   s.platform     = :ios
   s.license      = 'MIT'
   s.homepage     = 'http://github.com/hohl/PKCS-Universal'

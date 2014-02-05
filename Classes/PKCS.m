@@ -154,16 +154,37 @@ SecKeyRef PKCSLoadRSAKey(CFTypeRef keyClass, NSString* keyTagString)
         return NULL;
 }
 
-BOOL PKCSDeleteRSAKey(CFTypeRef keyClass, NSString *keyTagString)
+NSData* PKCSLoadRSAKeyData(CFTypeRef keyClass, NSString* keyTagString)
 {
     NSDictionary* attr = @{
-                                   (__bridge id)kSecClass : (__bridge id)kSecClassKey,
-                                   (__bridge id)kSecAttrKeyType : (__bridge id)kSecAttrKeyTypeRSA,
-                                   (__bridge id)kSecAttrKeyClass : (__bridge id)keyClass,
-                                   (__bridge id)kSecAttrApplicationTag : [keyTagString dataUsingEncoding:NSUTF8StringEncoding]
-                                   };
+        (__bridge id)kSecClass : (__bridge id)kSecClassKey,
+        (__bridge id)kSecAttrKeyType : (__bridge id)kSecAttrKeyTypeRSA,
+        (__bridge id)kSecAttrKeyClass : (__bridge id)keyClass,
+        (__bridge id)kSecAttrApplicationTag : [keyTagString dataUsingEncoding:NSUTF8StringEncoding],
+        (__bridge id)kSecReturnData : @YES
+    };
+
+    CFTypeRef result;
+    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)attr, (CFTypeRef*)&result);
+
+    if (status == noErr && result)
+        return (NSData*)CFBridgingRelease(result);
+    else if (result)
+        CFRelease(result);
+
+    return nil;
+}
+
+BOOL PKCSDeleteRSAKey(CFTypeRef keyClass, NSString* keyTagString)
+{
+    NSDictionary* attr = @{
+        (__bridge id)kSecClass : (__bridge id)kSecClassKey,
+        (__bridge id)kSecAttrKeyType : (__bridge id)kSecAttrKeyTypeRSA,
+        (__bridge id)kSecAttrKeyClass : (__bridge id)keyClass,
+        (__bridge id)kSecAttrApplicationTag : [keyTagString dataUsingEncoding:NSUTF8StringEncoding]
+    };
 
     OSStatus status = SecItemDelete((__bridge CFDictionaryRef)attr);
-    
-	return status == noErr;
+
+    return status == noErr;
 }
