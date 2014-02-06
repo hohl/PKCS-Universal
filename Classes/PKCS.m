@@ -52,7 +52,7 @@ NSString* PKCSDecryptRSA(NSString* cipherString, SecKeyRef privateKey)
     return decryptedString;
 }
 
-BOOL PCKSGenerateKeyPair(NSString* publicTagString, NSString* privateTagString, NSNumber* keySize)
+BOOL PKCSGenerateKeyPair(NSString* publicTagString, NSString* privateTagString, NSNumber* keySize)
 {
     NSData* publicTag = [publicTagString dataUsingEncoding:NSUTF8StringEncoding];
     NSData* privateTag = [privateTagString dataUsingEncoding:NSUTF8StringEncoding];

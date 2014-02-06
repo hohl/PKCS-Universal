@@ -40,7 +40,7 @@ NSString* PKCSDecryptRSA(NSString* cipherString, SecKeyRef privateKey);
  * @param keySize Size of the key to create. (Valid numbers are 256, 512, 1024 and 2048)
  * @return YES if the create has been successfully created.
  */
-BOOL PCKSGenerateKeyPair(NSString* publicTagString, NSString* privateTagString, NSNumber* keySize);
+BOOL PKCSGenerateKeyPair(NSString* publicTagString, NSString* privateTagString, NSNumber* keySize);
 
 /**
  * Stores a private or public RSA key in the Apple Keychain.
