@@ -14,6 +14,26 @@
 
 #import "PKCS.h"
 #import <CommonCrypto/CommonCrypto.h>
+#import <CommonCrypto/CommonDigest.h>
+
+size_t _ASN1EncodeLength(unsigned char* buf, size_t length)
+{
+
+    // encode length in ASN.1 DER format
+    if (length < 128) {
+        buf[0] = length;
+        return 1;
+    }
+
+    size_t i = (length / 256) + 1;
+    buf[0] = i + 0x80;
+    for (size_t j = 0; j < i; ++j) {
+        buf[i - j] = length & 0xFF;
+        length = length >> 8;
+    }
+
+    return i + 1;
+}
 
 NSString* PKCSEncryptRSA(NSString* plainTextString, SecKeyRef publicKey)
 {
@@ -52,7 +72,70 @@ NSString* PKCSDecryptRSA(NSString* cipherString, SecKeyRef privateKey)
     return decryptedString;
 }
 
-BOOL PKCSGenerateKeyPair(NSString* publicTagString, NSString* privateTagString, NSNumber* keySize)
+NSData* PKCSSignBytesSHA256withRSA(NSData* plainData, SecKeyRef privateKey)
+{
+    if (!privateKey) {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                       reason:@"Passed private key of PKCSSignBytesSHA256withRSA must not be NULL!"
+                                     userInfo:nil];
+    }
+
+    size_t signedHashBytesSize = SecKeyGetBlockSize(privateKey);
+    uint8_t* signedHashBytes = malloc(signedHashBytesSize);
+    memset(signedHashBytes, 0x0, signedHashBytesSize);
+
+    size_t hashBytesSize = CC_SHA256_DIGEST_LENGTH;
+    uint8_t* hashBytes = malloc(hashBytesSize);
+    if (!CC_SHA256([plainData bytes], (CC_LONG)[plainData length], hashBytes)) {
+        return nil;
+    }
+
+    SecKeyRawSign(privateKey,
+                  kSecPaddingPKCS1SHA256,
+                  hashBytes,
+                  hashBytesSize,
+                  signedHashBytes,
+                  &signedHashBytesSize);
+
+    NSData* signedHash = [NSData dataWithBytes:signedHashBytes
+                                        length:(NSUInteger)signedHashBytesSize];
+
+    if (hashBytes)
+        free(hashBytes);
+    if (signedHashBytes)
+        free(signedHashBytes);
+
+    return signedHash;
+}
+
+BOOL PKCSVerifyBytesSHA256withRSA(NSData* plainData, NSData* signature, SecKeyRef publicKey)
+{
+    if (!publicKey) {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                       reason:@"Passed public key of PKCSVerifyBytesSHA256withRSA must not be NULL!"
+                                     userInfo:nil];
+    }
+    
+    size_t signedHashBytesSize = SecKeyGetBlockSize(publicKey);
+    const void* signedHashBytes = [signature bytes];
+
+    size_t hashBytesSize = CC_SHA256_DIGEST_LENGTH;
+    uint8_t* hashBytes = malloc(hashBytesSize);
+    if (!CC_SHA256([plainData bytes], (CC_LONG)[plainData length], hashBytes)) {
+        return NO;
+    }
+
+    OSStatus status = SecKeyRawVerify(publicKey,
+                                      kSecPaddingPKCS1SHA256,
+                                      hashBytes,
+                                      hashBytesSize,
+                                      signedHashBytes,
+                                      signedHashBytesSize);
+
+    return status == errSecSuccess;
+}
+
+BOOL PKCSGenerateKeyPair(NSString* publicTagString, NSString* privateTagString, NSNumber* keySize, BOOL isPermanent)
 {
     NSData* publicTag = [publicTagString dataUsingEncoding:NSUTF8StringEncoding];
     NSData* privateTag = [privateTagString dataUsingEncoding:NSUTF8StringEncoding];
@@ -61,11 +144,11 @@ BOOL PKCSGenerateKeyPair(NSString* publicTagString, NSString* privateTagString, 
         (__bridge id)kSecAttrKeyType : (__bridge id)kSecAttrKeyTypeRSA,
         (__bridge id)kSecAttrKeySizeInBits : keySize,
         (__bridge id)kSecPrivateKeyAttrs : @{
-            (__bridge id)kSecAttrIsPermanent : @YES,
+            (__bridge id)kSecAttrIsPermanent : [NSNumber numberWithBool:isPermanent],
             (__bridge id)kSecAttrApplicationTag : privateTag
         },
         (__bridge id)kSecPublicKeyAttrs : @{
-            (__bridge id)kSecAttrIsPermanent : @YES,
+            (__bridge id)kSecAttrIsPermanent : [NSNumber numberWithBool:isPermanent],
             (__bridge id)kSecAttrApplicationTag : publicTag
         }
     };
