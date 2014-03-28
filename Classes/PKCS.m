@@ -13,27 +13,8 @@
 //
 
 #import "PKCS.h"
-#import <CommonCrypto/CommonCrypto.h>
-#import <CommonCrypto/CommonDigest.h>
-
-size_t _ASN1EncodeLength(unsigned char* buf, size_t length)
-{
-
-    // encode length in ASN.1 DER format
-    if (length < 128) {
-        buf[0] = length;
-        return 1;
-    }
-
-    size_t i = (length / 256) + 1;
-    buf[0] = i + 0x80;
-    for (size_t j = 0; j < i; ++j) {
-        buf[i - j] = length & 0xFF;
-        length = length >> 8;
-    }
-
-    return i + 1;
-}
+#import <Security/Security.h>
+#import <Security/SecItem.h>
 
 NSString* PKCSEncryptRSA(NSString* plainTextString, SecKeyRef publicKey)
 {

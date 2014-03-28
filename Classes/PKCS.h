@@ -12,8 +12,6 @@
 //  http://opensource.org/licenses/MIT
 //
 
-#import <Foundation/Foundation.h>
-
 /**
  * Encrypt the passed plain text message.
  * 
